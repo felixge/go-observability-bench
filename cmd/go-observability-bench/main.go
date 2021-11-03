@@ -9,7 +9,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-const usage = "usage: go-profiler-bench <config> <outdir>"
+const usage = "usage: go-observability-bench <config> <outdir>"
 
 func main() {
 	if err := run(); err != nil {

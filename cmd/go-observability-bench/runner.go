@@ -7,7 +7,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/felixge/go-profiler-bench/workload"
+	"github.com/felixge/go-observability-bench/workload"
 	"gopkg.in/yaml.v3"
 )
 

@@ -19,7 +19,7 @@ type Coordinator struct {
 	Config string
 	// Outdir is the path to the output directory.
 	Outdir string
-	// Bin is the path to go-profiler-bench binary to use for spawning child
+	// Bin is the path to go-observability-bench binary to use for spawning child
 	// processes executing workloads.
 	Bin string
 	// Enable verbose output
