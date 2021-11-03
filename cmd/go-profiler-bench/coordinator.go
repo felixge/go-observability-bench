@@ -63,13 +63,18 @@ func (c Coordinator) runConfigs(config Config) ([]RunConfig, error) {
 		for _, jc := range config.Jobs {
 			for _, workload := range jc.Workload {
 				for _, duration := range jc.Duration {
-					for _, cpuProfiles := range jc.CPUProfiles {
+					for _, profile := range jc.Profile {
+						if profile.Period == 0 {
+							profile.Period = duration
+						}
+
 						for _, args := range jc.Args {
 							name := expand(jc.Name, map[string]interface{}{
-								"iteration":    i,
-								"workload":     workload,
-								"duration":     duration,
-								"cpu_profiles": cpuProfiles,
+								"iteration":      i,
+								"workload":       workload,
+								"duration":       duration,
+								"profile_cpu":    profile.CPU,
+								"profile_period": profile.Period,
 							})
 
 							dupeNames[name]++
@@ -83,12 +88,12 @@ func (c Coordinator) runConfigs(config Config) ([]RunConfig, error) {
 								return nil, err
 							}
 							runConf := RunConfig{
-								Name:        name,
-								Workload:    workload,
-								Duration:    duration,
-								CPUProfiles: cpuProfiles,
-								Args:        string(argsData),
-								Outdir:      filepath.Join(c.Outdir, name),
+								Name:     name,
+								Workload: workload,
+								Duration: duration,
+								Profile:  profile,
+								Args:     string(argsData),
+								Outdir:   filepath.Join(c.Outdir, name),
 							}
 							runConfigs = append(runConfigs, runConf)
 						}

@@ -11,12 +11,12 @@ import (
 )
 
 type RunConfig struct {
-	Name        string        `yaml:"name"`
-	Workload    string        `yaml:"workload"`
-	Duration    time.Duration `yaml:"duration"`
-	CPUProfiles int           `yaml:"cpu_profiles"`
-	Outdir      string        `yaml:"outdir"`
-	Args        string        `yaml:"args"`
+	Name     string        `yaml:"name"`
+	Workload string        `yaml:"workload"`
+	Duration time.Duration `yaml:"duration"`
+	Profile  ProfileConfig `yaml:"profile"`
+	Outdir   string        `yaml:"outdir"`
+	Args     string        `yaml:"args"`
 }
 
 type Runner struct {
@@ -46,9 +46,9 @@ func (r *Runner) Run() error {
 	}
 
 	prof := &Profiler{
-		CPUProfiles: r.CPUProfiles,
-		Duration:    r.RunConfig.Duration,
-		Outdir:      r.Outdir,
+		ProfileConfig: r.Profile,
+		Duration:      r.RunConfig.Duration,
+		Outdir:        r.Outdir,
 	}
 	prof.Start()
 
