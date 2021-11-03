@@ -62,40 +62,46 @@ func (c Coordinator) runConfigs(config Config) ([]RunConfig, error) {
 	for i := 0; i < config.Repeat; i++ {
 		for _, jc := range config.Jobs {
 			for _, workload := range jc.Workload {
-				for _, duration := range jc.Duration {
-					for _, profile := range jc.Profile {
-						if profile.Period == 0 {
-							profile.Period = duration
-						}
-
-						for _, args := range jc.Args {
-							name := expand(jc.Name, map[string]interface{}{
-								"iteration":      i,
-								"workload":       workload,
-								"duration":       duration,
-								"profile_cpu":    profile.CPU,
-								"profile_period": profile.Period,
-							})
-
-							dupeNames[name]++
-							count := dupeNames[name]
-							if count > 1 {
-								name = fmt.Sprintf("%s.%d", name, count)
+				for _, concurrency := range jc.Concurrency {
+					for _, duration := range jc.Duration {
+						for _, profile := range jc.Profile {
+							if profile.Period == 0 {
+								profile.Period = duration
 							}
 
-							argsData, err := yaml.Marshal(args)
-							if err != nil {
-								return nil, err
+							for _, args := range jc.Args {
+								name := expand(jc.Name, map[string]interface{}{
+									"iteration":        i,
+									"workload":         workload,
+									"concurrency":      concurrency,
+									"duration":         duration,
+									"profile_period":   profile.Period,
+									"profile_cpu":      profile.CPU,
+									"profile_mem":      profile.Mem,
+									"profile_mem_rate": profile.MemRate,
+								})
+
+								dupeNames[name]++
+								count := dupeNames[name]
+								if count > 1 {
+									name = fmt.Sprintf("%s.%d", name, count)
+								}
+
+								argsData, err := yaml.Marshal(args)
+								if err != nil {
+									return nil, err
+								}
+								runConf := RunConfig{
+									Name:        name,
+									Workload:    workload,
+									Concurrency: concurrency,
+									Duration:    duration,
+									Profile:     profile,
+									Args:        string(argsData),
+									Outdir:      filepath.Join(c.Outdir, name),
+								}
+								runConfigs = append(runConfigs, runConf)
 							}
-							runConf := RunConfig{
-								Name:     name,
-								Workload: workload,
-								Duration: duration,
-								Profile:  profile,
-								Args:     string(argsData),
-								Outdir:   filepath.Join(c.Outdir, name),
-							}
-							runConfigs = append(runConfigs, runConf)
 						}
 					}
 				}
@@ -148,15 +154,45 @@ func (c *Coordinator) run(rc RunConfig, maxNameLength int) error {
 		return nil
 	}
 
+	var errors int
 	var avg time.Duration
+	var firstErr string
 	for _, op := range runner.Ops {
 		avg += op.Duration
+		if op.Error != "" {
+			errors++
+			if firstErr == "" {
+				firstErr = fmt.Sprintf(" (%s)", op.Error)
+			}
+		}
 	}
 	if len(runner.Ops) > 0 {
 		avg = avg / time.Duration(len(runner.Ops))
 	}
-	avg = avg.Truncate(time.Millisecond / 10)
+	magnitude := time.Duration(1)
+	for {
+		if magnitude > avg {
+			avg = avg.Truncate(magnitude / 1000)
+			break
+		}
+		magnitude = magnitude * 10
+	}
 
-	fmt.Printf("ops=%d avg=%s\n", len(runner.Ops), avg)
+	fmt.Printf("ops=%d avg=%s errors=%d%s\n", len(runner.Ops), avg, errors, firstErr)
 	return nil
 }
+
+/*
+
+123.531ms = 123.531.000 ns
+
+magnitude = 1000ms
+truncate  = 1ms
+
+12.531ms = 12.531.000 ns
+
+magnitude = 100ms
+truncate  = 0.1ms
+
+
+*/

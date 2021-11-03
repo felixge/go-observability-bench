@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"runtime"
 	"syscall"
@@ -11,12 +12,13 @@ import (
 )
 
 type RunConfig struct {
-	Name     string        `yaml:"name"`
-	Workload string        `yaml:"workload"`
-	Duration time.Duration `yaml:"duration"`
-	Profile  ProfileConfig `yaml:"profile"`
-	Outdir   string        `yaml:"outdir"`
-	Args     string        `yaml:"args"`
+	Name        string        `yaml:"name"`
+	Workload    string        `yaml:"workload"`
+	Concurrency int           `yaml:"concurrency"`
+	Duration    time.Duration `yaml:"duration"`
+	Profile     ProfileConfig `yaml:"profile"`
+	Outdir      string        `yaml:"outdir"`
+	Args        string        `yaml:"args"`
 }
 
 type Runner struct {
@@ -54,30 +56,48 @@ func (r *Runner) Run() error {
 
 	durationOver := closeAfter(r.RunConfig.Duration)
 
-workloop:
-	for {
-		start := time.Now()
-		err := w.Run()
-		dt := time.Since(start)
+	workerDone := make(chan []RunOp)
+	for i := 0; i < r.Concurrency; i++ {
+		go func() {
+			var ops []RunOp
+			defer func() { workerDone <- ops }()
 
-		op := RunOp{
-			Start:    start,
-			Duration: dt,
-			Error:    errStr(err),
-		}
-		r.Ops = append(r.Ops, op)
-		select {
-		case <-durationOver:
-			if profiles, done := prof.Done(); done {
-				r.Profiles = profiles
-				break workloop
+			for {
+				start := time.Now()
+				err := w.Run()
+				dt := time.Since(start)
+
+				op := RunOp{
+					Start:    start,
+					Duration: dt,
+					Error:    errStr(err),
+				}
+				ops = append(ops, op)
+				select {
+				case <-durationOver:
+					if _, done := prof.Done(); done {
+						return
+					}
+				default:
+					continue
+				}
 			}
-		default:
-			continue
-		}
+		}()
 	}
 
 	r.RunResult.Duration = time.Since(r.Start)
+
+	for i := 0; i < r.Concurrency; i++ {
+		ops := <-workerDone
+		r.Ops = append(r.Ops, ops...)
+	}
+
+	if profiles, done := prof.Done(); !done {
+		return errors.New("bug: workers finished but profiler didn't")
+	} else {
+		r.Profiles = profiles
+	}
+
 	var after syscall.Rusage
 	if err := syscall.Getrusage(0, &after); err != nil {
 		return err
