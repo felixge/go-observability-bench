@@ -79,6 +79,7 @@ func (c Coordinator) runConfigs(config Config) ([]RunConfig, error) {
 									"profile_cpu":      profile.CPU,
 									"profile_mem":      profile.Mem,
 									"profile_mem_rate": profile.MemRate,
+									"profilers":        strings.Join(profile.Profilers(), ","),
 								})
 
 								dupeNames[name]++
@@ -154,10 +155,16 @@ func (c *Coordinator) run(rc RunConfig, maxNameLength int) error {
 		return nil
 	}
 
+	ops, err := ReadOps(filepath.Join(rc.Outdir, "ops.csv"))
+	if err != nil {
+		fmt.Printf("error: %s\n", err)
+		return nil
+	}
+
 	var errors int
 	var avg time.Duration
 	var firstErr string
-	for _, op := range runner.Ops {
+	for _, op := range ops {
 		avg += op.Duration
 		if op.Error != "" {
 			errors++
@@ -166,8 +173,8 @@ func (c *Coordinator) run(rc RunConfig, maxNameLength int) error {
 			}
 		}
 	}
-	if len(runner.Ops) > 0 {
-		avg = avg / time.Duration(len(runner.Ops))
+	if len(ops) > 0 {
+		avg = avg / time.Duration(len(ops))
 	}
 	magnitude := time.Duration(1)
 	for {
@@ -178,7 +185,7 @@ func (c *Coordinator) run(rc RunConfig, maxNameLength int) error {
 		magnitude = magnitude * 10
 	}
 
-	fmt.Printf("ops=%d avg=%s errors=%d%s\n", len(runner.Ops), avg, errors, firstErr)
+	fmt.Printf("ops=%d avg=%s errors=%d%s\n", len(ops), avg, errors, firstErr)
 	return nil
 }
 

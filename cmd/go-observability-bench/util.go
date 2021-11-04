@@ -35,3 +35,31 @@ func closeAfter(dt time.Duration) chan struct{} {
 	time.AfterFunc(dt, func() { close(ch) })
 	return ch
 }
+
+func getRusage() (r Rusage, err error) {
+	var raw syscall.Rusage
+	if err = syscall.Getrusage(0, &raw); err != nil {
+		return
+	}
+
+	r.System = toDuration(raw.Stime)
+	r.User = toDuration(raw.Utime)
+	r.Signals = raw.Nsignals
+	r.HardFaults = raw.Majflt
+	r.SoftFaults = raw.Minflt
+	r.VoluntaryContextSwitches = raw.Nvcsw
+	r.InvoluntaryContextSwitches = raw.Nivcsw
+	r.MaxRSS = raw.Maxrss
+	return
+}
+
+type Rusage struct {
+	User                       time.Duration `yaml:"user"`
+	System                     time.Duration `yaml:"system"`
+	Signals                    int64         `yaml:"signals"` // Warning: unmaintained in linux
+	MaxRSS                     int64         `yaml:"maxrss"`  // Warning: kB in darwin, b in Linux
+	SoftFaults                 int64         `yaml:"soft_faults"`
+	HardFaults                 int64         `yaml:"hard_faults"`
+	VoluntaryContextSwitches   int64         `yaml:"voluntary_context_switches"`
+	InvoluntaryContextSwitches int64         `yaml:"involuntary_context_switches"`
+}

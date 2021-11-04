@@ -69,3 +69,29 @@ type ProfileConfig struct {
 	Goroutine bool          `yaml:"goroutine"`
 	Trace     bool          `yaml:"trace"`
 }
+
+func (p ProfileConfig) Profilers() []string {
+	var profilers []string
+	if p.CPU {
+		profilers = append(profilers, "cpu")
+	}
+	if p.Mem {
+		profilers = append(profilers, "mem")
+	}
+	if p.Block {
+		profilers = append(profilers, "block")
+	}
+	if p.Mutex {
+		profilers = append(profilers, "mutex")
+	}
+	if p.Goroutine {
+		profilers = append(profilers, "goroutine")
+	}
+	if p.Trace {
+		profilers = append(profilers, "trace")
+	}
+	if len(profilers) == 0 {
+		profilers = append(profilers, "none")
+	}
+	return profilers
+}

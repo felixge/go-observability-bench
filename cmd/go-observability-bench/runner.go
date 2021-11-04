@@ -1,10 +1,13 @@
 package main
 
 import (
+	"encoding/csv"
 	"errors"
 	"fmt"
+	"io"
+	"os"
+	"path/filepath"
 	"runtime"
-	"syscall"
 	"time"
 
 	"github.com/felixge/go-observability-bench/workload"
@@ -42,10 +45,11 @@ func (r *Runner) Run() error {
 		return err
 	}
 
-	var before syscall.Rusage
-	if err := syscall.Getrusage(0, &before); err != nil {
+	r.BeforeRusage, err = getRusage()
+	if err != nil {
 		return err
 	}
+	runtime.ReadMemStats(&r.BeforeMemStats)
 
 	prof := &Profiler{
 		ProfileConfig: r.Profile,
@@ -85,11 +89,26 @@ func (r *Runner) Run() error {
 		}()
 	}
 
-	r.RunResult.Duration = time.Since(r.Start)
-
+	var allOps []RunOp
 	for i := 0; i < r.Concurrency; i++ {
 		ops := <-workerDone
-		r.Ops = append(r.Ops, ops...)
+		allOps = append(allOps, ops...)
+	}
+	r.RunResult.Duration = time.Since(r.Start)
+
+	csvFile, err := os.Create(filepath.Join(r.Outdir, "ops.csv"))
+	if err != nil {
+		return err
+	}
+	defer csvFile.Close()
+	cw := csv.NewWriter(csvFile)
+	cw.Write([]string{"start", "duration", "error"})
+	for _, op := range allOps {
+		cw.Write(op.ToRecord())
+	}
+	cw.Flush()
+	if err := cw.Error(); err != nil {
+		return err
 	}
 
 	if profiles, done := prof.Done(); !done {
@@ -98,29 +117,29 @@ func (r *Runner) Run() error {
 		r.Profiles = profiles
 	}
 
-	var after syscall.Rusage
-	if err := syscall.Getrusage(0, &after); err != nil {
+	r.AfterRusage, err = getRusage()
+	if err != nil {
 		return err
 	}
-	r.System = toDuration(after.Stime) - toDuration(before.Stime)
-	r.User = toDuration(after.Utime) - toDuration(before.Utime)
+	runtime.ReadMemStats(&r.AfterMemStats)
 
 	data, err := yaml.Marshal(r)
 	if err != nil {
 		return err
 	}
-	fmt.Printf("data:\n%s\n", data)
+	fmt.Println(string(data))
 	return nil
 }
 
 type RunResult struct {
-	Start    time.Time     `yaml:"start"`
-	Env      WorkloadEnv   `yaml:"env"`
-	Duration time.Duration `yaml:"duration"`
-	Profiles []RunProfile  `yaml:"profiles"`
-	User     time.Duration `yaml:"user"`
-	System   time.Duration `yaml:"system"`
-	Ops      []RunOp       `yaml:"runs"`
+	Start          time.Time        `yaml:"start"`
+	Env            WorkloadEnv      `yaml:"env"`
+	Duration       time.Duration    `yaml:"duration"`
+	BeforeRusage   Rusage           `yaml:"before_rusage"`
+	AfterRusage    Rusage           `yaml:"after_rusage"`
+	BeforeMemStats runtime.MemStats `yaml:"before_mem_stats"`
+	AfterMemStats  runtime.MemStats `yaml:"after_mem_stats"`
+	Profiles       []RunProfile     `yaml:"profiles"`
 }
 
 type WorkloadEnv struct {
@@ -145,4 +164,57 @@ type RunOp struct {
 	Start    time.Time     `yaml:"start"`
 	Duration time.Duration `yaml:"duration"`
 	Error    string        `yaml:"error,omitempty"`
+}
+
+func (op RunOp) ToRecord() []string {
+	return []string{
+		op.Start.Format(time.RFC3339Nano),
+		op.Duration.String(),
+		op.Error,
+	}
+}
+
+func (op *RunOp) FromRecord(row []string) error {
+	start, err := time.Parse(time.RFC3339Nano, row[0])
+	if err != nil {
+		return err
+	}
+	op.Start = start
+
+	duration, err := time.ParseDuration(row[1])
+	if err != nil {
+		return err
+	}
+	op.Duration = duration
+
+	op.Error = row[2]
+	return nil
+}
+
+func ReadOps(path string) ([]RunOp, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	var ops []RunOp
+	cr := csv.NewReader(file)
+	for isHeader := true; ; isHeader = false {
+		record, err := cr.Read()
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			return nil, err
+		} else if isHeader {
+			continue
+		}
+
+		var op RunOp
+		if err := op.FromRecord(record); err != nil {
+			return nil, err
+		}
+		ops = append(ops, op)
+	}
+	return ops, nil
 }
