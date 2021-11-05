@@ -1,6 +1,6 @@
-_duration: &duration 100ms
+_duration: &duration 1s
 
-repeat: 3
+repeat: 5
 jobs:
   - name: "${workload}/${duration}/${concurrency}/${profilers}/${iteration}"
     workload: [json,http,chan,mutex]
