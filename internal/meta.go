@@ -40,6 +40,7 @@ type RunMeta struct {
 type RunConfig struct {
 	Name        string        `yaml:"name"`
 	Workload    string        `yaml:"workload"`
+	Iteration   int           `yaml:"iteration"`
 	Concurrency int           `yaml:"concurrency"`
 	Duration    time.Duration `yaml:"duration"`
 	Profile     ProfileConfig `yaml:"profile"`

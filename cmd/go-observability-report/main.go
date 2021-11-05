@@ -48,7 +48,6 @@ func run() error {
 	benchSpan := tracer.StartSpan(
 		"bench",
 		tracer.StartTime(start),
-		tracer.Tag("test", "foo"),
 	)
 	defer benchSpan.Finish(tracer.FinishTime(end))
 	for _, run := range runs {
@@ -58,6 +57,10 @@ func run() error {
 			tracer.ServiceName(run.Workload),
 			tracer.StartTime(run.Start),
 			tracer.ChildOf(benchSpan.Context()),
+			tracer.Tag("concurrency", run.Concurrency),
+			tracer.Tag("iteration", run.Iteration),
+			tracer.Tag("name", run.Name),
+			tracer.Tag("profiles", run.Profile.Profilers()),
 		)
 		runSpan.Finish(tracer.FinishTime(r.Start.Add(r.Duration)))
 	}

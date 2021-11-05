@@ -98,6 +98,7 @@ func (c Coordinator) runConfigs(config internal.Config) ([]internal.RunConfig, e
 								}
 								runConf := internal.RunConfig{
 									Name:        name,
+									Iteration:   i,
 									Workload:    workload,
 									Concurrency: concurrency,
 									Duration:    duration,
