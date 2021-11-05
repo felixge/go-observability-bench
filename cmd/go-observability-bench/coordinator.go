@@ -149,11 +149,6 @@ func (c *Coordinator) run(rc internal.RunConfig, maxNameLength int) error {
 		return nil
 	}
 
-	metaPath := filepath.Join(rc.Outdir, "meta.yaml")
-	if err := ioutil.WriteFile(metaPath, out.Bytes(), 0644); err != nil {
-		return err
-	}
-
 	meta := &RunMeta{}
 	if err := yaml.Unmarshal(out.Bytes(), &meta); err != nil {
 		fmt.Printf("error: %s\n", err)
@@ -181,6 +176,8 @@ func (c *Coordinator) run(rc internal.RunConfig, maxNameLength int) error {
 	if len(ops) > 0 {
 		avg = avg / time.Duration(len(ops))
 	}
+	meta.Latency.Avg = avg
+
 	magnitude := time.Duration(1)
 	for {
 		if magnitude > avg {
@@ -188,6 +185,16 @@ func (c *Coordinator) run(rc internal.RunConfig, maxNameLength int) error {
 			break
 		}
 		magnitude = magnitude * 10
+	}
+
+	metaYAML, err := yaml.Marshal(meta)
+	if err != nil {
+		fmt.Printf("error: %s\n", err)
+		return nil
+	}
+	metaPath := filepath.Join(rc.Outdir, "meta.yaml")
+	if err := ioutil.WriteFile(metaPath, metaYAML, 0644); err != nil {
+		return err
 	}
 
 	fmt.Printf("ops=%d avg=%s errors=%d%s\n", len(ops), avg, errors, firstErr)
