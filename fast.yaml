@@ -1,0 +1,37 @@
+_duration: &duration 100ms
+
+repeat: 3
+jobs:
+  - name: "${workload}/${duration}/${concurrency}/${profilers}/${iteration}"
+    workload: [json,http,chan,mutex]
+    concurrency: [1]
+    duration: [*duration]
+    profile:
+      - {}
+      - cpu: true
+        period: *duration
+      - mem: true
+        period: *duration
+      - block: true
+        period: *duration
+      - mutex: true
+        period: *duration
+      - goroutine: true
+        period: *duration
+      - mem: true
+        cpu: true
+        period: *duration
+      - mem: true
+        cpu: true
+        block: true
+        mutex: true
+        period: *duration
+      - mem: true
+        cpu: true
+        block: true
+        mutex: true
+        trace: true
+        goroutine: true
+        period: *duration
+    args:
+      - file: data/small.json
