@@ -18,6 +18,7 @@ jobs:
         env:
           DD_API_KEY: ${{ secrets.DD_API_KEY }}
           DD_INSIDE_CI: true
+          DD_DOGSTATSD_NON_LOCAL_TRAFFIC: true
           DD_HOSTNAME: "go-observability-bench"
           DD_SERVICE: "go-observability-bench"
 
