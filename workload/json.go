@@ -5,13 +5,12 @@ import (
 	"io/ioutil"
 )
 
-type JSONUnmarshal struct {
+type JSON struct {
 	File string `json:"file"`
-
 	data []byte
 }
 
-func (j *JSONUnmarshal) Setup() error {
+func (j *JSON) Setup() error {
 	data, err := ioutil.ReadFile(j.File)
 	if err != nil {
 		return err
@@ -20,8 +19,11 @@ func (j *JSONUnmarshal) Setup() error {
 	return nil
 }
 
-func (j *JSONUnmarshal) Run() error {
+func (j *JSON) Run() error {
 	var m interface{}
-	err := json.Unmarshal(j.data, &m)
+	if err := json.Unmarshal(j.data, &m); err != nil {
+		return err
+	}
+	_, err := json.Marshal(m)
 	return err
 }

@@ -36,20 +36,23 @@ func (c *Coordinator) Run() error {
 		return err
 	}
 
-	configs, err := c.runConfigs(config)
+	runs, err := c.runConfigs(config)
 	if err != nil {
 		return err
 	}
 
 	var maxNameLength int
-	for _, wc := range configs {
-		if len(wc.Name) > maxNameLength {
-			maxNameLength = len(wc.Name)
+	var totalDuration time.Duration
+	for _, run := range runs {
+		if len(run.Name) > maxNameLength {
+			maxNameLength = len(run.Name)
 		}
+		totalDuration += run.Duration
 	}
 
-	for _, wc := range configs {
-		if err := c.run(wc, maxNameLength); err != nil {
+	fmt.Printf("starting %d runs, expected duration: %s\n\n", len(runs), totalDuration)
+	for _, run := range runs {
+		if err := c.run(run, maxNameLength); err != nil {
 			return err
 		}
 	}

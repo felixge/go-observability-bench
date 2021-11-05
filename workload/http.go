@@ -29,8 +29,7 @@ func (h *HTTP) Run() error {
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return err
-	}
-	if resp.StatusCode != 200 || string(data) != msg {
+	} else if resp.StatusCode != 200 || string(data) != msg {
 		return fmt.Errorf("bad response: %d: %s", resp.StatusCode, data)
 	}
 	return nil

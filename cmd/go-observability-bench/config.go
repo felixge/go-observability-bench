@@ -41,6 +41,9 @@ func (c *Config) setDefaults() {
 			if prof.Block && prof.BlockRate == 0 {
 				prof.BlockRate = 10000
 			}
+			if prof.Mutex && prof.MutexRate == 0 {
+				prof.MutexRate = 10
+			}
 		}
 
 		// Note: profile.Period defaults to the Job's duration, see

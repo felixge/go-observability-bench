@@ -14,10 +14,14 @@ type Workload interface {
 func New(name string, args []byte) (Workload, error) {
 	var w Workload
 	switch name {
-	case "json_unmarshal":
-		w = &JSONUnmarshal{}
+	case "json":
+		w = &JSON{}
 	case "http":
 		w = &HTTP{}
+	case "chan":
+		w = &Chan{}
+	case "mutex":
+		w = &Mutex{}
 	default:
 		return nil, fmt.Errorf("unknown workload: %q", name)
 	}
