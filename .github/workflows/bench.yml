@@ -10,7 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     services:
-      ddagent:
+      dd-agent:
         image: datadog/agent:latest
         ports:
           - 8125:8125/udp
