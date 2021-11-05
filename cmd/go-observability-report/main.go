@@ -83,7 +83,9 @@ func run() error {
 		)
 		runSpan.Finish(tracer.FinishTime(r.Start.Add(r.Duration)))
 	}
-	fmt.Printf("Finished\n")
-
-	return statsd.Close()
+	if err := statsd.Close(); err != nil {
+		return err
+	}
+	time.Sleep(20 * time.Second)
+	return nil
 }
