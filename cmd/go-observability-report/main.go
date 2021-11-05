@@ -50,7 +50,7 @@ func run() error {
 
 		tags := []string{
 			fmt.Sprintf("iteration:%d", meta.Iteration),
-			fmt.Sprintf("profilers:%s", strings.Join(meta.Profile.Profilers(), ",")),
+			fmt.Sprintf("profilers:%s", strings.Join(meta.Profile.Profilers(), "&")),
 			fmt.Sprintf("name:%s", meta.Name),
 			fmt.Sprintf("workload:%s", meta.Workload),
 			fmt.Sprintf("concurrency:%d", meta.Concurrency),
