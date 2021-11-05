@@ -11,10 +11,12 @@ import (
 	"runtime/trace"
 	"strings"
 	"time"
+
+	"github.com/felixge/go-observability-bench/internal"
 )
 
 type Profiler struct {
-	ProfileConfig
+	internal.ProfileConfig
 	Duration time.Duration
 	Outdir   string
 
@@ -26,8 +28,8 @@ type Profiler struct {
 
 type profiler struct {
 	Kind    string
-	Enabled func(ProfileConfig) bool
-	Init    func(ProfileConfig)
+	Enabled func(internal.ProfileConfig) bool
+	Init    func(internal.ProfileConfig)
 	Start   func(io.Writer) error
 	Stop    func(io.Writer) error
 }
@@ -35,7 +37,7 @@ type profiler struct {
 var profilers = []profiler{
 	{
 		Kind:    "cpu.pprof",
-		Enabled: func(c ProfileConfig) bool { return c.CPU },
+		Enabled: func(c internal.ProfileConfig) bool { return c.CPU },
 		Start: func(w io.Writer) error {
 			return pprof.StartCPUProfile(w)
 		},
@@ -47,8 +49,8 @@ var profilers = []profiler{
 
 	{
 		Kind:    "mem.pprof",
-		Enabled: func(c ProfileConfig) bool { return c.Mem },
-		Init: func(c ProfileConfig) {
+		Enabled: func(c internal.ProfileConfig) bool { return c.Mem },
+		Init: func(c internal.ProfileConfig) {
 			if c.MemRate != 0 {
 				runtime.MemProfileRate = c.MemRate
 			}
@@ -60,8 +62,8 @@ var profilers = []profiler{
 
 	{
 		Kind:    "block.pprof",
-		Enabled: func(c ProfileConfig) bool { return c.Block },
-		Init: func(c ProfileConfig) {
+		Enabled: func(c internal.ProfileConfig) bool { return c.Block },
+		Init: func(c internal.ProfileConfig) {
 			if c.BlockRate != 0 {
 				runtime.SetBlockProfileRate(c.BlockRate)
 			}
@@ -73,8 +75,8 @@ var profilers = []profiler{
 
 	{
 		Kind:    "mutex.pprof",
-		Enabled: func(c ProfileConfig) bool { return c.Mutex },
-		Init: func(c ProfileConfig) {
+		Enabled: func(c internal.ProfileConfig) bool { return c.Mutex },
+		Init: func(c internal.ProfileConfig) {
 			if c.MutexRate != 0 {
 				runtime.SetMutexProfileFraction(c.MutexRate)
 			}
@@ -86,7 +88,7 @@ var profilers = []profiler{
 
 	{
 		Kind:    "goroutine.pprof",
-		Enabled: func(c ProfileConfig) bool { return c.Mutex },
+		Enabled: func(c internal.ProfileConfig) bool { return c.Mutex },
 		Stop: func(w io.Writer) error {
 			return pprof.Lookup("goroutine").WriteTo(w, 0)
 		},
@@ -94,7 +96,7 @@ var profilers = []profiler{
 
 	{
 		Kind:    "trace.out",
-		Enabled: func(c ProfileConfig) bool { return c.Trace },
+		Enabled: func(c internal.ProfileConfig) bool { return c.Trace },
 		Start: func(w io.Writer) error {
 			return trace.Start(w)
 		},

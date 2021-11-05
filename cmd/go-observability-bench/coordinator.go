@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/felixge/go-observability-bench/internal"
 	"gopkg.in/yaml.v3"
 )
 
@@ -31,7 +32,7 @@ func (c *Coordinator) Run() error {
 		return err
 	}
 
-	config, err := ReadConfig(c.Config)
+	config, err := internal.ReadConfig(c.Config)
 	if err != nil {
 		return err
 	}
@@ -59,7 +60,7 @@ func (c *Coordinator) Run() error {
 	return nil
 }
 
-func (c Coordinator) runConfigs(config Config) ([]RunConfig, error) {
+func (c Coordinator) runConfigs(config internal.Config) ([]RunConfig, error) {
 	dupeNames := map[string]int{}
 	var runConfigs []RunConfig
 	for i := 0; i < config.Repeat; i++ {

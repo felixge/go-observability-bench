@@ -10,18 +10,19 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/felixge/go-observability-bench/internal"
 	"github.com/felixge/go-observability-bench/workload"
 	"gopkg.in/yaml.v3"
 )
 
 type RunConfig struct {
-	Name        string        `yaml:"name"`
-	Workload    string        `yaml:"workload"`
-	Concurrency int           `yaml:"concurrency"`
-	Duration    time.Duration `yaml:"duration"`
-	Profile     ProfileConfig `yaml:"profile"`
-	Outdir      string        `yaml:"outdir"`
-	Args        string        `yaml:"args"`
+	Name        string                 `yaml:"name"`
+	Workload    string                 `yaml:"workload"`
+	Concurrency int                    `yaml:"concurrency"`
+	Duration    time.Duration          `yaml:"duration"`
+	Profile     internal.ProfileConfig `yaml:"profile"`
+	Outdir      string                 `yaml:"outdir"`
+	Args        string                 `yaml:"args"`
 }
 
 type Runner struct {
