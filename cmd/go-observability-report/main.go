@@ -84,7 +84,6 @@ func run() error {
 		runSpan.Finish(tracer.FinishTime(r.Start.Add(r.Duration)))
 	}
 	fmt.Printf("Finished\n")
-	time.Sleep(3 * time.Second)
 
-	return nil
+	return statsd.Close()
 }
