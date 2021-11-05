@@ -148,13 +148,13 @@ func (c *Coordinator) run(rc internal.RunConfig, maxNameLength int) error {
 		return nil
 	}
 
-	resultPath := filepath.Join(rc.Outdir, "result.yaml")
-	if err := ioutil.WriteFile(resultPath, out.Bytes(), 0644); err != nil {
+	metaPath := filepath.Join(rc.Outdir, "meta.yaml")
+	if err := ioutil.WriteFile(metaPath, out.Bytes(), 0644); err != nil {
 		return err
 	}
 
-	runner := &Runner{}
-	if err := yaml.Unmarshal(out.Bytes(), &runner); err != nil {
+	meta := &RunMeta{}
+	if err := yaml.Unmarshal(out.Bytes(), &meta); err != nil {
 		fmt.Printf("error: %s\n", err)
 		return nil
 	}

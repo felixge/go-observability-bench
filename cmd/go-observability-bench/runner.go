@@ -26,7 +26,7 @@ type RunConfig struct {
 }
 
 type Runner struct {
-	RunMeta
+	RunMeta `yaml:",inline"`
 }
 
 type RunMeta struct {

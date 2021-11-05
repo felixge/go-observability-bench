@@ -1,9 +1,36 @@
 package internal
 
 import (
+	"io/fs"
+	"io/ioutil"
+	"path/filepath"
 	"runtime"
 	"time"
+
+	"gopkg.in/yaml.v3"
 )
+
+func ReadMeta(dir string, cb func(*RunMeta) error) error {
+	return filepath.Walk(dir, func(path string, info fs.FileInfo, err error) error {
+		fileName := filepath.Base(path)
+		if fileName == "meta.yaml" {
+			data, err := ioutil.ReadFile(path)
+			if err != nil {
+				return err
+			}
+			meta := &RunMeta{}
+			if err := yaml.Unmarshal(data, &meta); err != nil {
+				return err
+			}
+			return cb(meta)
+		}
+		return nil
+	})
+	//data, err := ioutil.ReadFile(path)
+	//if err != nil {
+	//return nil, err
+	//}
+}
 
 type RunMeta struct {
 	RunConfig `yaml:"config"`
