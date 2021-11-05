@@ -22,3 +22,8 @@ jobs:
 
     - name: Fast Bench
       run: go-observability-bench ./fast.yaml fast
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: results
+        path: fast
