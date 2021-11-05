@@ -60,9 +60,9 @@ func (c *Coordinator) Run() error {
 	return nil
 }
 
-func (c Coordinator) runConfigs(config internal.Config) ([]RunConfig, error) {
+func (c Coordinator) runConfigs(config internal.Config) ([]internal.RunConfig, error) {
 	dupeNames := map[string]int{}
-	var runConfigs []RunConfig
+	var runConfigs []internal.RunConfig
 	for i := 0; i < config.Repeat; i++ {
 		for _, jc := range config.Jobs {
 			for _, workload := range jc.Workload {
@@ -96,7 +96,7 @@ func (c Coordinator) runConfigs(config internal.Config) ([]RunConfig, error) {
 								if err != nil {
 									return nil, err
 								}
-								runConf := RunConfig{
+								runConf := internal.RunConfig{
 									Name:        name,
 									Workload:    workload,
 									Concurrency: concurrency,
@@ -116,7 +116,7 @@ func (c Coordinator) runConfigs(config internal.Config) ([]RunConfig, error) {
 	return runConfigs, nil
 }
 
-func (c *Coordinator) run(rc RunConfig, maxNameLength int) error {
+func (c *Coordinator) run(rc internal.RunConfig, maxNameLength int) error {
 	fmt.Printf("%s %s", rc.Name, strings.Repeat(" ", maxNameLength-len(rc.Name)))
 
 	workloadData, err := yaml.Marshal(rc)

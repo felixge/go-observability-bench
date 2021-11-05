@@ -21,9 +21,9 @@ type Profiler struct {
 	Outdir   string
 
 	doneCh   chan struct{}
-	profiles []RunProfile
+	profiles []internal.RunProfile
 	bufs     map[string]*bytes.Buffer
-	profs    map[string]*RunProfile
+	profs    map[string]*internal.RunProfile
 }
 
 type profiler struct {
@@ -110,7 +110,7 @@ var profilers = []profiler{
 func (p *Profiler) Start() {
 	p.doneCh = make(chan struct{})
 	p.bufs = make(map[string]*bytes.Buffer)
-	p.profs = make(map[string]*RunProfile)
+	p.profs = make(map[string]*internal.RunProfile)
 
 	if enabled := p.startProfiles(0); enabled == 0 {
 		close(p.doneCh)
@@ -143,7 +143,7 @@ func (p *Profiler) startProfiles(iteration int) int {
 			startErr = prof.Start(buf)
 		}
 
-		p.profiles = append(p.profiles, RunProfile{
+		p.profiles = append(p.profiles, internal.RunProfile{
 			Kind:  prof.Kind,
 			Start: start,
 			Error: errStr(startErr),
@@ -180,7 +180,7 @@ func (p *Profiler) stopProfiles(iteration int) {
 	}
 }
 
-func (p *Profiler) Done() ([]RunProfile, bool) {
+func (p *Profiler) Done() ([]internal.RunProfile, bool) {
 	select {
 	case <-p.doneCh:
 		return p.profiles, true

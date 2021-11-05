@@ -26,8 +26,12 @@ type RunConfig struct {
 }
 
 type Runner struct {
-	RunConfig `yaml:"config"`
-	RunResult `yaml:"result"`
+	RunMeta
+}
+
+type RunMeta struct {
+	RunConfig          `yaml:"config"`
+	internal.RunResult `yaml:"result"`
 }
 
 func (r *Runner) Run() error {
@@ -61,10 +65,10 @@ func (r *Runner) Run() error {
 
 	durationOver := closeAfter(r.RunConfig.Duration)
 
-	workerDone := make(chan []RunOp)
+	workerDone := make(chan []internal.RunOp)
 	for i := 0; i < r.Concurrency; i++ {
 		go func() {
-			var ops []RunOp
+			var ops []internal.RunOp
 			defer func() { workerDone <- ops }()
 
 			for {
@@ -72,7 +76,7 @@ func (r *Runner) Run() error {
 				err := w.Run()
 				dt := time.Since(start)
 
-				op := RunOp{
+				op := internal.RunOp{
 					Start:    start,
 					Duration: dt,
 					Error:    errStr(err),
@@ -90,7 +94,7 @@ func (r *Runner) Run() error {
 		}()
 	}
 
-	var allOps []RunOp
+	var allOps []internal.RunOp
 	for i := 0; i < r.Concurrency; i++ {
 		ops := <-workerDone
 		allOps = append(allOps, ops...)
@@ -132,74 +136,14 @@ func (r *Runner) Run() error {
 	return nil
 }
 
-type RunResult struct {
-	Start          time.Time        `yaml:"start"`
-	Env            WorkloadEnv      `yaml:"env"`
-	Duration       time.Duration    `yaml:"duration"`
-	BeforeRusage   Rusage           `yaml:"before_rusage"`
-	AfterRusage    Rusage           `yaml:"after_rusage"`
-	BeforeMemStats runtime.MemStats `yaml:"before_mem_stats"`
-	AfterMemStats  runtime.MemStats `yaml:"after_mem_stats"`
-	Profiles       []RunProfile     `yaml:"profiles"`
-}
-
-type WorkloadEnv struct {
-	GoVersion  string `yaml:"go_version"`
-	GoOS       string `yaml:"go_os"`
-	GoArch     string `yaml:"go_arch"`
-	GoMaxProcs int    `yaml:"go_max_procs"`
-	GoNumCPU   int    `yaml:"go_num_cpu"`
-	// TODO: add kernel version
-}
-
-type RunProfile struct {
-	Kind            string        `yaml:"kind"`
-	File            string        `yaml:"file,omitempty"`
-	Start           time.Time     `yaml:"start"`
-	ProfileDuration time.Duration `yaml:"profile_duration,omitempty"`
-	StopDuration    time.Duration `yaml:"stop_duration,omitempty"`
-	Error           string        `yaml:"error,omitempty"`
-}
-
-type RunOp struct {
-	Start    time.Time     `yaml:"start"`
-	Duration time.Duration `yaml:"duration"`
-	Error    string        `yaml:"error,omitempty"`
-}
-
-func (op RunOp) ToRecord() []string {
-	return []string{
-		op.Start.Format(time.RFC3339Nano),
-		op.Duration.String(),
-		op.Error,
-	}
-}
-
-func (op *RunOp) FromRecord(row []string) error {
-	start, err := time.Parse(time.RFC3339Nano, row[0])
-	if err != nil {
-		return err
-	}
-	op.Start = start
-
-	duration, err := time.ParseDuration(row[1])
-	if err != nil {
-		return err
-	}
-	op.Duration = duration
-
-	op.Error = row[2]
-	return nil
-}
-
-func ReadOps(path string) ([]RunOp, error) {
+func ReadOps(path string) ([]internal.RunOp, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
 	defer file.Close()
 
-	var ops []RunOp
+	var ops []internal.RunOp
 	cr := csv.NewReader(file)
 	for isHeader := true; ; isHeader = false {
 		record, err := cr.Read()
@@ -211,7 +155,7 @@ func ReadOps(path string) ([]RunOp, error) {
 			continue
 		}
 
-		var op RunOp
+		var op internal.RunOp
 		if err := op.FromRecord(record); err != nil {
 			return nil, err
 		}
