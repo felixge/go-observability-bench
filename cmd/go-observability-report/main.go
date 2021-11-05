@@ -86,6 +86,5 @@ func run() error {
 	if err := statsd.Close(); err != nil {
 		return err
 	}
-	time.Sleep(20 * time.Second)
 	return nil
 }
