@@ -162,10 +162,20 @@ func (c *Coordinator) run(rc internal.RunConfig, maxNameLength int) error {
 	}
 
 	var errors int
-	var avg time.Duration
+	var (
+		totalDuration time.Duration
+		minDuration   time.Duration
+		maxDuration   time.Duration
+	)
 	var firstErr string
 	for _, op := range ops {
-		avg += op.Duration
+		totalDuration += op.Duration
+		if op.Duration < minDuration || minDuration == 0 {
+			minDuration = op.Duration
+		}
+		if op.Duration > maxDuration {
+			maxDuration = op.Duration
+		}
 		if op.Error != "" {
 			errors++
 			if firstErr == "" {
@@ -173,16 +183,20 @@ func (c *Coordinator) run(rc internal.RunConfig, maxNameLength int) error {
 			}
 		}
 	}
+	var avgDuration time.Duration
 	if len(ops) > 0 {
-		avg = avg / time.Duration(len(ops))
+		avgDuration = totalDuration / time.Duration(len(ops))
 	}
-	meta.Stats.Ops = len(ops)
-	meta.Stats.Avg = avg
+	meta.Stats.OpsCount = len(ops)
+	meta.Stats.AvgDuration = avgDuration
+	meta.Stats.TotalDuration = totalDuration
+	meta.Stats.MinDuration = minDuration
+	meta.Stats.MaxDuration = maxDuration
 
 	magnitude := time.Duration(1)
 	for {
-		if magnitude > avg {
-			avg = avg.Truncate(magnitude / 1000)
+		if magnitude > avgDuration {
+			avgDuration = avgDuration.Truncate(magnitude / 1000)
 			break
 		}
 		magnitude = magnitude * 10
@@ -198,6 +212,6 @@ func (c *Coordinator) run(rc internal.RunConfig, maxNameLength int) error {
 		return err
 	}
 
-	fmt.Printf("ops=%d avg=%s errors=%d%s\n", len(ops), avg, errors, firstErr)
+	fmt.Printf("ops=%d avg=%s errors=%d%s\n", len(ops), avgDuration, errors, firstErr)
 	return nil
 }

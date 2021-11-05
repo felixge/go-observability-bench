@@ -61,8 +61,11 @@ type RunResult struct {
 }
 
 type Stats struct {
-	Ops int           `yaml:"ops"`
-	Avg time.Duration `yaml:"avg"`
+	OpsCount      int           `yaml:"ops_count"`
+	AvgDuration   time.Duration `yaml:"avg_duration"`
+	MinDuration   time.Duration `yaml:"min_duration"`
+	MaxDuration   time.Duration `yaml:"max_duration"`
+	TotalDuration time.Duration `yaml:"total_duration"`
 }
 
 type WorkloadEnv struct {

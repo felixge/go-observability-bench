@@ -54,9 +54,25 @@ func run() error {
 			fmt.Sprintf("name:%s", meta.Name),
 			fmt.Sprintf("workload:%s", meta.Workload),
 			fmt.Sprintf("concurrency:%d", meta.Concurrency),
+			fmt.Sprintf("go_version:%s", meta.Env.GoVersion),
+			fmt.Sprintf("go_os:%s", meta.Env.GoOS),
+			fmt.Sprintf("go_arch:%s", meta.Env.GoArch),
+			fmt.Sprintf("go_max_procs:%d", meta.Env.GoMaxProcs),
+			fmt.Sprintf("go_num_cpu:%d", meta.Env.GoNumCPU),
 		}
-		statsd.Gauge("go-observability-bench.stats.avg", r.Stats.Avg.Seconds(), tags, 1)
-		statsd.Gauge("go-observability-bench.stats.ops", float64(r.Stats.Ops), tags, 1)
+
+		userDuration := r.AfterRusage.User - r.BeforeRusage.User
+		sysDuration := r.AfterRusage.System - r.BeforeRusage.System
+
+		statsd.Gauge("go-observability-bench.stats.heap_in_use", float64(r.AfterMemStats.HeapInuse), tags, 1)
+		statsd.Gauge("go-observability-bench.stats.buck_hash_sys", float64(r.AfterMemStats.BuckHashSys), tags, 1)
+		statsd.Gauge("go-observability-bench.stats.user_duration", userDuration.Seconds(), tags, 1)
+		statsd.Gauge("go-observability-bench.stats.system_duration", sysDuration.Seconds(), tags, 1)
+		statsd.Gauge("go-observability-bench.stats.min_duration", r.Stats.MinDuration.Seconds(), tags, 1)
+		statsd.Gauge("go-observability-bench.stats.avg_duration", r.Stats.AvgDuration.Seconds(), tags, 1)
+		statsd.Gauge("go-observability-bench.stats.max_duration", r.Stats.MaxDuration.Seconds(), tags, 1)
+		statsd.Gauge("go-observability-bench.stats.total_duration", r.Stats.TotalDuration.Seconds(), tags, 1)
+		statsd.Gauge("go-observability-bench.stats.ops", float64(r.Stats.OpsCount), tags, 1)
 		return nil
 	})
 	if err != nil {
@@ -78,8 +94,8 @@ func run() error {
 			tracer.Tag("iteration", run.Iteration),
 			tracer.Tag("name", run.Name),
 			tracer.Tag("profiles", run.Profile.Profilers()),
-			tracer.Tag("latency.ops", run.Stats.Ops),
-			tracer.Tag("latency.avg", run.Stats.Avg),
+			tracer.Tag("latency.ops", run.Stats.OpsCount),
+			tracer.Tag("latency.avg", run.Stats.AvgDuration),
 		)
 		runSpan.Finish(tracer.FinishTime(r.Start.Add(r.Duration)))
 	}
