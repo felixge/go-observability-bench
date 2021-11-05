@@ -1,4 +1,4 @@
-name: Go
+name: Bench Fast
 
 on:
   push:
@@ -9,6 +9,17 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    services:
+      dd-agent:
+      image: datadog/agent:latest
+      ports:
+        - 8126:8126
+      env:
+        DD_API_KEY: ${{ secrets.DD_API_KEY }}
+        DD_INSIDE_CI: true
+        DD_HOSTNAME: "go-observability-bench"
+        DD_SERVICE: "go-observability-bench"
+
     steps:
     - uses: actions/checkout@v2
 
@@ -20,10 +31,11 @@ jobs:
     - name: Build
       run: go install ./cmd/go-observability-bench 
 
-    - name: Fast Bench
+    - name: Bench
       run: go-observability-bench ./fast.yaml fast
 
-    - uses: actions/upload-artifact@v2
+    - name: Upload Results
+      uses: actions/upload-artifact@v2
       with:
         name: results
         path: fast
