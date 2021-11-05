@@ -13,7 +13,7 @@ jobs:
       dd-agent:
         image: datadog/agent:latest
         ports:
-          - 8125:8125
+          - 8125:8125/udp
           - 8126:8126
         env:
           DD_API_KEY: ${{ secrets.DD_API_KEY }}
