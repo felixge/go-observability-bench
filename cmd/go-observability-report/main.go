@@ -72,7 +72,7 @@ func run() error {
 		statsd.Gauge("go-observability-bench.stats.avg_duration", r.Stats.AvgDuration.Seconds(), tags, 1)
 		statsd.Gauge("go-observability-bench.stats.max_duration", r.Stats.MaxDuration.Seconds(), tags, 1)
 		statsd.Gauge("go-observability-bench.stats.total_duration", r.Stats.TotalDuration.Seconds(), tags, 1)
-		statsd.Gauge("go-observability-bench.stats.ops", float64(r.Stats.OpsCount), tags, 1)
+		statsd.Gauge("go-observability-bench.stats.ops_count", float64(r.Stats.OpsCount), tags, 1)
 		return nil
 	})
 	if err != nil {
