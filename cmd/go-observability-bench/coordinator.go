@@ -193,18 +193,3 @@ func (c *Coordinator) run(rc internal.RunConfig, maxNameLength int) error {
 	fmt.Printf("ops=%d avg=%s errors=%d%s\n", len(ops), avg, errors, firstErr)
 	return nil
 }
-
-/*
-
-123.531ms = 123.531.000 ns
-
-magnitude = 1000ms
-truncate  = 1ms
-
-12.531ms = 12.531.000 ns
-
-magnitude = 100ms
-truncate  = 0.1ms
-
-
-*/

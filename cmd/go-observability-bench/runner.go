@@ -15,22 +15,12 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type RunConfig struct {
-	Name        string                 `yaml:"name"`
-	Workload    string                 `yaml:"workload"`
-	Concurrency int                    `yaml:"concurrency"`
-	Duration    time.Duration          `yaml:"duration"`
-	Profile     internal.ProfileConfig `yaml:"profile"`
-	Outdir      string                 `yaml:"outdir"`
-	Args        string                 `yaml:"args"`
-}
-
 type Runner struct {
 	RunMeta `yaml:",inline"`
 }
 
 type RunMeta struct {
-	RunConfig          `yaml:"config"`
+	internal.RunConfig `yaml:"config"`
 	internal.RunResult `yaml:"result"`
 }
 
