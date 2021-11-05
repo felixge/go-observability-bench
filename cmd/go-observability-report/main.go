@@ -61,6 +61,8 @@ func run() error {
 			tracer.Tag("iteration", run.Iteration),
 			tracer.Tag("name", run.Name),
 			tracer.Tag("profiles", run.Profile.Profilers()),
+			tracer.Tag("latency.ops", run.Stats.Ops),
+			tracer.Tag("latency.avg", run.Stats.Avg),
 		)
 		runSpan.Finish(tracer.FinishTime(r.Start.Add(r.Duration)))
 	}

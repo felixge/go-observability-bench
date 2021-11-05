@@ -176,7 +176,8 @@ func (c *Coordinator) run(rc internal.RunConfig, maxNameLength int) error {
 	if len(ops) > 0 {
 		avg = avg / time.Duration(len(ops))
 	}
-	meta.Latency.Avg = avg
+	meta.Stats.Ops = len(ops)
+	meta.Stats.Avg = avg
 
 	magnitude := time.Duration(1)
 	for {

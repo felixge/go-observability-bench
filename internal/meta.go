@@ -52,7 +52,7 @@ type RunResult struct {
 	Start          time.Time        `yaml:"start"`
 	Env            WorkloadEnv      `yaml:"env"`
 	Duration       time.Duration    `yaml:"duration"`
-	Latency        Latency          `yaml:"latency"`
+	Stats          Stats            `yaml:"stats"`
 	Profiles       []RunProfile     `yaml:"profiles"`
 	BeforeRusage   Rusage           `yaml:"before_rusage"`
 	AfterRusage    Rusage           `yaml:"after_rusage"`
@@ -60,7 +60,8 @@ type RunResult struct {
 	AfterMemStats  runtime.MemStats `yaml:"after_mem_stats"`
 }
 
-type Latency struct {
+type Stats struct {
+	Ops int           `yaml:"ops"`
 	Avg time.Duration `yaml:"avg"`
 }
 
