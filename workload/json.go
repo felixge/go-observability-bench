@@ -6,7 +6,7 @@ import (
 )
 
 type JSON struct {
-	File string `json:"file"`
+	File string `yaml:"json_file"`
 	data []byte
 }
 

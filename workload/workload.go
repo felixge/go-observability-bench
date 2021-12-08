@@ -22,6 +22,8 @@ func New(name string, args []byte) (Workload, error) {
 		w = &Chan{}
 	case "mutex":
 		w = &Mutex{}
+	case "sql":
+		w = &SQL{}
 	default:
 		return nil, fmt.Errorf("unknown workload: %q", name)
 	}

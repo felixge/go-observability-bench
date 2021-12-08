@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Performance Result Comparison</title>
+<style>
+.benchstat { border-collapse: collapse; }
+.benchstat th:nth-child(1) { text-align: left; }
+.benchstat tbody td:nth-child(1n+2):not(.note) { text-align: right; padding: 0em 1em; }
+.benchstat tr:not(.configs) th { border-top: 1px solid #666; border-bottom: 1px solid #ccc; }
+.benchstat .nodelta { text-align: center !important; }
+.benchstat .better td.delta { font-weight: bold; }
+.benchstat .worse td.delta { font-weight: bold; color: #c00; }
+</style>
+</head>
+<body>
+
+<table class='benchstat oldnew'>
+<tr class='configs'><th><th>no.txt<th>cpu.txt
+
+
+<tbody>
+<tr><th><th colspan='2' class='metric'>time/op<th>delta
+<tr class='worse'><td>JSON-12<td>2.50ms ± 1%<td>2.58ms ± 2%<td class='delta'>&#43;3.08%<td class='note'>(p=0.000 n=29&#43;30)
+<tr><td>&nbsp;
+</tbody>
+
+</table>
+</body>
+</html>

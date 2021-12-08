@@ -1,10 +1,11 @@
-_duration: &duration 1s
+_duration: &duration 100ms
 
 repeat: 5
 jobs:
   - name: "${workload}/${duration}/${concurrency}/${profilers}/${iteration}"
-    workload: [json,http,chan,mutex]
-    concurrency: [1]
+    workload: [json]
+      #workload: [sql,json,http,chan,mutex]
+    concurrency: [1,8]
     duration: [*duration]
     profile:
       - {}
@@ -18,20 +19,15 @@ jobs:
         period: *duration
       - goroutine: true
         period: *duration
-      - mem: true
-        cpu: true
+      - trace: true
         period: *duration
-      - mem: true
-        cpu: true
+      - cpu: true
+        mem: true
         block: true
         mutex: true
-        period: *duration
-      - mem: true
-        cpu: true
-        block: true
-        mutex: true
-        trace: true
         goroutine: true
+        trace: true
         period: *duration
     args:
-      - file: data/small.json
+      - json_file: data/small.json
+        sql_dsn: "fuck"

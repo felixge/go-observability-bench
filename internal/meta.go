@@ -10,8 +10,11 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func ReadMeta(dir string, cb func(*RunMeta) error) error {
-	return filepath.Walk(dir, func(path string, info fs.FileInfo, err error) error {
+func ReadMeta(dir string, cb func(*RunMeta, string) error) error {
+	return filepath.Walk(dir, func(path string, _ fs.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
 		fileName := filepath.Base(path)
 		if fileName == "meta.yaml" {
 			data, err := ioutil.ReadFile(path)
@@ -22,7 +25,8 @@ func ReadMeta(dir string, cb func(*RunMeta) error) error {
 			if err := yaml.Unmarshal(data, &meta); err != nil {
 				return err
 			}
-			return cb(meta)
+			opsPath := filepath.Join(filepath.Dir(path), "ops.csv")
+			return cb(meta, opsPath)
 		}
 		return nil
 	})

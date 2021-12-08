@@ -1,0 +1,36 @@
+goos: darwin
+goarch: amd64
+pkg: github.com/felixge/go-observability-bench/workload
+cpu: Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz
+BenchmarkJSON-12    	    476	  2485753 ns/op
+BenchmarkJSON-12    	    482	  2490976 ns/op
+BenchmarkJSON-12    	    478	  2500099 ns/op
+BenchmarkJSON-12    	    482	  2533454 ns/op
+BenchmarkJSON-12    	    481	  2485354 ns/op
+BenchmarkJSON-12    	    481	  2530951 ns/op
+BenchmarkJSON-12    	    482	  2506885 ns/op
+BenchmarkJSON-12    	    480	  2500950 ns/op
+BenchmarkJSON-12    	    482	  2485771 ns/op
+BenchmarkJSON-12    	    480	  2509058 ns/op
+BenchmarkJSON-12    	    472	  2515114 ns/op
+BenchmarkJSON-12    	    480	  2517617 ns/op
+BenchmarkJSON-12    	    472	  2498155 ns/op
+BenchmarkJSON-12    	    482	  2499591 ns/op
+BenchmarkJSON-12    	    482	  2485601 ns/op
+BenchmarkJSON-12    	    482	  2491531 ns/op
+BenchmarkJSON-12    	    471	  2496547 ns/op
+BenchmarkJSON-12    	    481	  2505512 ns/op
+BenchmarkJSON-12    	    478	  2500644 ns/op
+BenchmarkJSON-12    	    481	  2698257 ns/op
+BenchmarkJSON-12    	    482	  2486197 ns/op
+BenchmarkJSON-12    	    480	  2508279 ns/op
+BenchmarkJSON-12    	    477	  2488004 ns/op
+BenchmarkJSON-12    	    481	  2486573 ns/op
+BenchmarkJSON-12    	    468	  2486687 ns/op
+BenchmarkJSON-12    	    481	  2488017 ns/op
+BenchmarkJSON-12    	    471	  2532223 ns/op
+BenchmarkJSON-12    	    478	  2491653 ns/op
+BenchmarkJSON-12    	    481	  2485555 ns/op
+BenchmarkJSON-12    	    478	  2497249 ns/op
+PASS
+ok  	github.com/felixge/go-observability-bench/workload	43.629s
