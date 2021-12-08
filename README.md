@@ -1,3 +1,5 @@
+**strong:** WIP - NOT READY TO LOOK AT
+
 # go-observability-bench
 
 ## Terminology
